@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+    }
+
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .bpm-display {
+      font-size: 2rem;
+      font-weight: bold;
+      margin: 1rem 0;
+    }
+
+    .slider-container {
+      margin: 2rem 0;
+    }
+
+    #bpm-slider {
+      width: 300px;
+      margin: 0 auto;
+    }
+
+    #toggle-btn {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    #toggle-btn:hover {
+      background-color: #45a049;
+    }
+
+    #toggle-btn.playing {
+      background-color: #f44336;
+    }
+
+    #toggle-btn.playing:hover {
+      background-color: #da190b;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Metronome</h1>
+    <div class="bpm-display">
+      <span id="bpm-value">120</span> BPM
+    </div>
+    <div class="slider-container">
+      <input type="range" id="bpm-slider" min="40" max="208" value="120">
+    </div>
+    <button id="toggle-btn">Start</button>
+  </div>
+
+  <script>
+    class Metronome {
+      constructor() {
+        this.audioContext = null;
+        this.isPlaying = false;
+        this.intervalId = null;
+        this.bpm = 120;
+
+        this.bpmDisplay = document.getElementById('bpm-value');
+        this.slider = document.getElementById('bpm-slider');
+        this.toggleBtn = document.getElementById('toggle-btn');
+
+        this.setupEventListeners();
+        this.initAudioContext();
+      }
+
+      initAudioContext() {
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+
+      setupEventListeners() {
+        this.slider.addEventListener('input', () => {
+          this.bpm = parseInt(this.slider.value);
+          this.bpmDisplay.textContent = this.bpm;
+          if (this.isPlaying) {
+            this.restart();
+          }
+        });
+
+        this.toggleBtn.addEventListener('click', () => {
+          this.toggle();
+        });
+      }
+
+      async createClickSound() {
+        const duration = 0.1;
+        const sampleRate = this.audioContext.sampleRate;
+        const bufferSize = duration * sampleRate;
+        const buffer = this.audioContext.createBuffer(1, bufferSize, sampleRate);
+        const channel = buffer.getChannelData(0);
+
+        // Generate a simple click sound
+        for (let i = 0; i < bufferSize; i++) {
+          if (i < 0.01 * sampleRate) {
+            channel[i] = Math.sin(i * 0.1) * Math.exp(-4 * i / (0.01 * sampleRate));
+          } else {
+            channel[i] = 0;
+          }
+        }
+
+        return buffer;
+      }
+
+      async playClick() {
+        if (!this.clickBuffer) {
+          this.clickBuffer = await this.createClickSound();
+        }
+
+        const source = this.audioContext.createBufferSource();
+        source.buffer = this.clickBuffer;
+        source.connect(this.audioContext.destination);
+        source.start();
+      }
+
+      start() {
+        if (this.audioContext.state === 'suspended') {
+          this.audioContext.resume();
+        }
+
+        this.isPlaying = true;
+        this.toggleBtn.textContent = 'Stop';
+        this.toggleBtn.classList.add('playing');
+
+        const interval = (60 / this.bpm) * 1000;
+        this.playClick();
+        this.intervalId = setInterval(() => this.playClick(), interval);
+      }
+
+      stop() {
+        this.isPlaying = false;
+        this.toggleBtn.textContent = 'Start';
+        this.toggleBtn.classList.remove('playing');
+        clearInterval(this.intervalId);
+      }
+
+      restart() {
+        this.stop();
+        this.start();
+      }
+
+      toggle() {
+        if (this.isPlaying) {
+          this.stop();
+        } else {
+          this.start();
+        }
+      }
+    }
+
+    // Initialize the metronome when the page loads
+    window.addEventListener('load', () => {
+      const metronome = new Metronome();
+    });
+  </script>
+</body>
+
+</html>

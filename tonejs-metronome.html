@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metronome</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .bpm-display {
+            font-size: 2rem;
+            margin: 1rem 0;
+        }
+
+        .slider-container {
+            margin: 2rem 0;
+        }
+
+        #bpm-slider {
+            width: 300px;
+        }
+
+        #play-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #play-button:hover {
+            background-color: #45a049;
+        }
+
+        #play-button.playing {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Metronome</h1>
+        <div class="bpm-display">
+            <span id="bpm-value">120</span> BPM
+        </div>
+        <div class="slider-container">
+            <input type="range" id="bpm-slider" min="40" max="208" value="120">
+        </div>
+        <button id="play-button">Start</button>
+    </div>
+
+    <script>
+        const bpmSlider = document.getElementById('bpm-slider');
+        const bpmDisplay = document.getElementById('bpm-value');
+        const playButton = document.getElementById('play-button');
+
+        let isPlaying = false;
+
+        // Initialize Tone.js synth with higher pitch settings
+        const synth = new Tone.NoiseSynth({
+            noise: {
+                type: 'white'
+            },
+            envelope: {
+                attack: 0.001,
+                decay: 0.05,
+                sustain: 0,
+                release: 0.01
+            }
+        }).toDestination();
+
+        // Add a filter to shape the noise into a click
+        const filter = new Tone.Filter({
+            frequency: 2400,
+            type: 'bandpass',
+            Q: 3
+        }).toDestination();
+
+        synth.connect(filter);
+        synth.volume.value = -10;
+
+        // Create Tone.js loop
+        let loop = new Tone.Loop(time => {
+            synth.triggerAttackRelease('32n', time);
+        }, '4n');
+
+        // Update BPM display when slider changes
+        bpmSlider.addEventListener('input', (e) => {
+            const bpm = e.target.value;
+            bpmDisplay.textContent = bpm;
+            Tone.Transport.bpm.value = bpm;
+        });
+
+        // Handle play/stop button
+        playButton.addEventListener('click', async () => {
+            // Start audio context on first click (required by browsers)
+            if (Tone.context.state !== 'running') {
+                await Tone.start();
+            }
+
+            if (!isPlaying) {
+                playButton.textContent = 'Stop';
+                playButton.classList.add('playing');
+                loop.start(0);
+                Tone.Transport.start();
+            } else {
+                playButton.textContent = 'Start';
+                playButton.classList.remove('playing');
+                Tone.Transport.stop();
+                loop.stop();
+            }
+            isPlaying = !isPlaying;
+        });
+
+        // Set initial BPM
+        Tone.Transport.bpm.value = bpmSlider.value;
+    </script>
+</body>
+
+</html>
