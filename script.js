@@ -27,14 +27,12 @@ const filter = new Tone.Filter({
 }).toDestination();
 
 synth.connect(filter);
-synth.volume.value = -10;
+synth.volume.value = 0;
 
 // Create Tone.js loop
 let loop = new Tone.Loop(time => {
     synth.triggerAttackRelease('32n', time);
     body.style.backgroundColor = 'hsl(' + Math.random() * 360 + ', 100%, 50%)';
-    setTorch(true);
-    setTorch(false);
 }, '4n');
 
 // Update BPM display when slider changes
@@ -42,6 +40,7 @@ bpmSlider.addEventListener('input', (e) => {
     const bpm = e.target.value;
     bpmDisplay.textContent = bpm;
     Tone.Transport.bpm.value = bpm;
+    localStorage.setItem("bpm", bpm);
 });
 
 // Handle play/stop button
@@ -66,4 +65,12 @@ playButton.addEventListener('click', async () => {
 });
 
 // Set initial BPM
+const savedBpm = localStorage.getItem("bpm");
+if (savedBpm) {
+    bpmSlider.value = savedBpm;
+    bpmDisplay.textContent = savedBpm;
+} else {
+    bpmSlider.value = 120;
+    bpmDisplay.textContent = 120;
+}
 Tone.Transport.bpm.value = bpmSlider.value;
