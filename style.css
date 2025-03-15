@@ -1,49 +1,456 @@
-body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    background-color: #f0f0f0;
+:root {
+    /* Material Design 3 color system */
+    --md-primary: #6750A4;
+    --md-primary-light: #D0BCFF;
+    --md-primary-dark: #381E72;
+    --md-secondary: #625B71;
+    --md-secondary-light: #CCC2DC;
+    --md-secondary-dark: #332D41;
+    --md-tertiary: #7D5260;
+    --md-tertiary-light: #EFB8C8;
+    --md-background: #FFFBFE;
+    --md-surface: #FFFBFE;
+    --md-surface-variant: #E7E0EC;
+    --md-error: #B3261E;
+    
+    /* Typography */
+    --md-font-display: 500 2.25rem/2.75rem 'Roboto', sans-serif;
+    --md-font-headline: 400 1.75rem/2.25rem 'Roboto', sans-serif;
+    --md-font-title: 500 1.25rem/1.75rem 'Roboto', sans-serif;
+    --md-font-body: 400 1rem/1.5rem 'Roboto', sans-serif;
+    --md-font-label: 500 0.875rem/1.25rem 'Roboto', sans-serif;
+    
+    /* Spacing */
+    --md-spacing-xs: 4px;
+    --md-spacing-s: 8px;
+    --md-spacing-m: 16px;
+    --md-spacing-l: 24px;
+    --md-spacing-xl: 32px;
+    --md-spacing-xxl: 48px;
+    
+    /* Elevation */
+    --md-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.14);
+    --md-elevation-2: 0 3px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12);
+    --md-elevation-3: 0 10px 20px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.10);
+    
+    /* Transition */
+    --md-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.container {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    text-align: center;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    font: var(--md-font-body);
+    background-color: var(--md-background);
+    color: var(--md-secondary-dark);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    height: 100vh;
+    transition: background-color 0.5s ease;
+    background-color: var(--md-background);
+}
+
+.app-bar {
+    background-color: var(--md-primary);
+    color: white;
+    padding: var(--md-spacing-m);
+    display: flex;
+    align-items: center;
+    box-shadow: var(--md-elevation-1);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.title {
+    font: var(--md-font-headline);
+    margin: 0;
+}
+
+.content {
+    flex-grow: 1;
+    padding: var(--md-spacing-m);
+    display: flex;
+    flex-direction: column;
+    gap: var(--md-spacing-l);
+    overflow-y: auto;
+}
+
+.bpm-card, .controls-card {
+    background-color: var(--md-surface);
+    border-radius: 16px;
+    box-shadow: var(--md-elevation-1);
+    padding: var(--md-spacing-l);
+    transition: var(--md-transition);
+    /* Make cards slightly transparent to show background color */
+    background-color: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(5px);
 }
 
 .bpm-display {
-    font-size: 2rem;
-    margin: 1rem 0;
+    text-align: center;
+    margin-bottom: var(--md-spacing-l);
+    display: flex;
+    flex-direction: column;
+}
+
+#bpm-value {
+    font: var(--md-font-display);
+    color: var(--md-primary);
+    font-size: 4rem;
+    line-height: 4.5rem;
+}
+
+.bpm-label {
+    font: var(--md-font-title);
+    color: var(--md-secondary);
+    margin-top: var(--md-spacing-xs);
 }
 
 .slider-container {
-    margin: 2rem 0;
+    width: 100%;
+    padding: 0 var(--md-spacing-m);
 }
 
-#bpm-slider {
-    width: 300px;
+.md-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--md-surface-variant);
+    outline: none;
+    transition: var(--md-transition);
 }
 
-#play-button {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 1rem 2rem;
-    font-size: 1.2rem;
-    border-radius: 4px;
+.md-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--md-primary);
     cursor: pointer;
-    transition: background-color 0.3s;
+    box-shadow: var(--md-elevation-1);
+    transition: var(--md-transition);
 }
 
-#play-button:hover {
-    background-color: #45a049;
+.md-slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--md-primary);
+    cursor: pointer;
+    box-shadow: var(--md-elevation-1);
+    border: none;
+    transition: var(--md-transition);
 }
 
-#play-button.playing {
-    background-color: #f44336;
+.md-slider::-webkit-slider-thumb:hover, 
+.md-slider::-webkit-slider-thumb:active {
+    box-shadow: var(--md-elevation-2);
+    background: var(--md-primary-dark);
+    transform: scale(1.1);
+}
+
+.md-slider::-moz-range-thumb:hover,
+.md-slider::-moz-range-thumb:active {
+    box-shadow: var(--md-elevation-2);
+    background: var(--md-primary-dark);
+    transform: scale(1.1);
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--md-spacing-s);
+    color: var(--md-secondary);
+    font: var(--md-font-label);
+}
+
+.controls-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--md-spacing-l);
+}
+
+.md-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--md-spacing-s);
+    padding: var(--md-spacing-m) var(--md-spacing-l);
+    border: none;
+    border-radius: 32px;
+    font: var(--md-font-label);
+    text-transform: uppercase;
+    letter-spacing: 0.1rem;
+    cursor: pointer;
+    transition: var(--md-transition);
+    min-height: 48px; /* Proper touch target size */
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    transform: scale(0);
+    animation: ripple-animation 0.6s linear;
+    pointer-events: none;
+    width: 100px;
+    height: 100px;
+    margin-top: -50px;
+    margin-left: -50px;
+}
+
+@keyframes ripple-animation {
+    to {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+
+.pulse {
+    animation: pulse-animation 0.3s ease-out;
+}
+
+@keyframes pulse-animation {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(0.95);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.md-button-primary {
+    background-color: var(--md-primary);
+    color: white;
+}
+
+.md-button-primary:hover, .md-button-primary:focus {
+    background-color: var(--md-primary-dark);
+    box-shadow: var(--md-elevation-2);
+}
+
+.md-button-primary.playing {
+    background-color: var(--md-error);
+}
+
+.md-button-secondary {
+    background-color: var(--md-surface-variant);
+    color: var(--md-secondary);
+}
+
+.md-button-secondary:hover, .md-button-secondary:focus {
+    background-color: var(--md-secondary-light);
+    box-shadow: var(--md-elevation-1);
+}
+
+.md-button-secondary.wav {
+    background-color: var(--md-tertiary-light);
+    color: var(--md-tertiary);
+}
+
+.sound-toggle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--md-spacing-s);
+}
+
+.sound-label {
+    font: var(--md-font-label);
+    color: var(--md-secondary);
+}
+
+.material-icons {
+    font-size: 1.25rem;
+}
+
+/* Mobile portrait optimizations */
+@media (max-width: 600px) {
+    .app-container {
+        height: 100vh;
+        max-width: 100%;
+    }
+    
+    .content {
+        padding: var(--md-spacing-m);
+    }
+    
+    .bpm-card, .controls-card {
+        padding: var(--md-spacing-m);
+    }
+    
+    #bpm-value {
+        font-size: 3.5rem;
+        line-height: 4rem;
+    }
+    
+    .md-button {
+        min-height: 56px; /* Larger touch target for mobile */
+    }
+}
+
+/* Landscape mode optimizations */
+@media (orientation: landscape) {
+    .app-container {
+        height: 100vh;
+        overflow: hidden;
+    }
+    
+    .app-bar {
+        padding: var(--md-spacing-s) var(--md-spacing-m);
+        background-color: transparent;
+        color: var(--md-secondary-dark);
+        box-shadow: none;
+    }
+    
+    .content {
+        flex-direction: row;
+        padding: var(--md-spacing-m);
+        overflow-y: auto;
+        gap: var(--md-spacing-xl);
+    }
+    
+    .bpm-card, .controls-card {
+        flex: 0.8;
+        padding: var(--md-spacing-m);
+        max-height: calc(100vh - 60px);
+        display: flex;
+        flex-direction: column;
+        /* Make cards much more transparent in landscape mode */
+        background-color: rgba(255, 255, 255, 0.35);
+    }
+    
+    .bpm-display {
+        margin-bottom: var(--md-spacing-m);
+    }
+    
+    #bpm-value {
+        font-size: 3rem;
+        line-height: 3.5rem;
+    }
+    
+    .controls-card {
+        justify-content: center;
+    }
+    
+    .md-button {
+        padding: var(--md-spacing-s) var(--md-spacing-m);
+        /* Adjust button background to be more transparent but still visible */
+        background-color: rgba(103, 80, 164, 0.85);
+    }
+    
+    .md-button-secondary {
+        background-color: rgba(231, 224, 236, 0.85);
+    }
+    
+    .md-button-secondary.wav {
+        background-color: rgba(239, 184, 200, 0.85);
+    }
+}
+
+/* Compact landscape mode (low height) */
+@media (orientation: landscape) and (max-height: 500px) {
+    .app-bar {
+        padding: var(--md-spacing-xs) var(--md-spacing-m);
+    }
+    
+    .title {
+        font-size: 1.25rem;
+    }
+    
+    .bpm-card, .controls-card {
+        padding: var(--md-spacing-s);
+    }
+    
+    #bpm-value {
+        font-size: 2.5rem;
+        line-height: 3rem;
+    }
+    
+    .bpm-display {
+        margin-bottom: var(--md-spacing-s);
+    }
+    
+    .controls-card {
+        gap: var(--md-spacing-s);
+    }
+    
+    .md-button {
+        min-height: 40px;
+        padding: var(--md-spacing-xs) var(--md-spacing-m);
+    }
+}
+
+/* Dark mode support - add a class to body to enable */
+body.dark-theme .app-container {
+    background-color: var(--md-background);
+}
+
+body.dark-theme {
+    --md-primary: #D0BCFF;
+    --md-primary-light: #EADDFF;
+    --md-primary-dark: #9A82DB;
+    --md-secondary: #CCC2DC;
+    --md-secondary-light: #E8DEF8;
+    --md-secondary-dark: #9A8FB1;
+    --md-tertiary: #EFB8C8;
+    --md-tertiary-light: #FFD8E4;
+    --md-tertiary-dark: #B58392;
+    --md-background: #1C1B1F;
+    --md-surface: #1C1B1F;
+    --md-surface-variant: #49454F;
+    --md-error: #F2B8B5;
+    color: #E6E1E5;
+}
+
+body.dark-theme .app-bar {
+    color: var(--md-secondary-light);
+}
+
+body.dark-theme .bpm-card,
+body.dark-theme .controls-card {
+    background-color: rgba(28, 27, 31, 0.75);
+}
+
+@media (orientation: landscape) {
+    body.dark-theme .bpm-card,
+    body.dark-theme .controls-card {
+        background-color: rgba(28, 27, 31, 0.35);
+    }
+    
+    body.dark-theme .md-button-primary {
+        background-color: rgba(208, 188, 255, 0.85);
+    }
+    
+    body.dark-theme .md-button-secondary {
+        background-color: rgba(73, 69, 79, 0.85);
+    }
+    
+    body.dark-theme .md-button-secondary.wav {
+        background-color: rgba(239, 184, 200, 0.85);
+    }
 }

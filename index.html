@@ -6,23 +6,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Metronome</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="icon" type="image/png" href="icon.png" sizes="any">
-
 </head>
 
 <body>
-    <div class="container">
-        <h1>Metronome</h1>
-        <div class="bpm-display">
-            <span id="bpm-value">120</span> BPM
+    <div class="app-container">
+        <div class="app-bar">
+            <h1 class="title">Metronome</h1>
         </div>
-        <div class="slider-container">
-            <input type="range" id="bpm-slider" min="30" max="200" value="120">
+        
+        <div class="content">
+            <div class="bpm-card">
+                <div class="bpm-display">
+                    <span id="bpm-value">120</span>
+                    <span class="bpm-label">BPM</span>
+                </div>
+                
+                <div class="slider-container">
+                    <input type="range" id="bpm-slider" min="30" max="200" value="120" class="md-slider">
+                    <div class="slider-labels">
+                        <span>30</span>
+                        <span>200</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls-card">
+                <button id="play-button" class="md-button md-button-primary">
+                    <span class="material-icons">play_arrow</span>
+                    <span>Start</span>
+                </button>
+                
+                <div class="sound-toggle">
+                    <span class="sound-label">Sound Type</span>
+                    <button id="sound-toggle" class="md-button md-button-secondary">
+                        <span class="material-icons">music_note</span>
+                        <span>Synth</span>
+                    </button>
+                </div>
+            </div>
         </div>
-        <button id="play-button">Start</button>
     </div>
-    <script src="torch.js"></script>
+    
     <script src="script.js"></script>
 </body>
 </html>
