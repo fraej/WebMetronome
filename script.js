@@ -2,12 +2,14 @@ const bpmSlider = document.getElementById('bpm-slider');
 const bpmDisplay = document.getElementById('bpm-value');
 const playButton = document.getElementById('play-button');
 const soundToggle = document.getElementById('sound-toggle');
+const torchToggle = document.getElementById('torch-toggle');
 const body = document.querySelector('body');
 const appContainer = document.querySelector('.app-container');
 
 let isPlaying = false;
 let useSynth = true;
 let currentHue = 0;
+let isTorchOn = false;
 
 // Initialize Tone.js synth with higher pitch settings
 const synth = new Tone.NoiseSynth({
@@ -78,6 +80,17 @@ let loop = new Tone.Loop(time => {
     setTimeout(() => {
         playButton.classList.remove('pulse');
     }, 100);
+    
+    // Flash the torch in sync with the beat if torch is enabled
+    if (isTorchOn) {
+        // Toggle torch on each beat for a flash effect
+        setTorch(true);
+        setTimeout(() => {
+            if (isTorchOn) { // Check if still enabled
+                setTorch(false);
+            }
+        }, 100); // Short flash duration
+    }
 }, '4n');
 
 // Update BPM display when slider changes
@@ -117,6 +130,11 @@ playButton.addEventListener('click', async () => {
         
         // Reset background color
         appContainer.style.backgroundColor = '';
+        
+        // Turn off torch if it was on
+        if (isTorchOn) {
+            setTorch(false);
+        }
     }
 });
 
@@ -131,6 +149,42 @@ soundToggle.addEventListener('click', () => {
         soundToggle.classList.add('wav');
     }
     localStorage.setItem("useSynth", useSynth);
+});
+
+// Handle torch toggle button
+torchToggle.addEventListener('click', async () => {
+    isTorchOn = !isTorchOn;
+    
+    if (isTorchOn) {
+        // Update button appearance
+        torchToggle.innerHTML = '<span class="material-icons">flashlight_on</span><span>On</span>';
+        torchToggle.classList.add('torch-on');
+        
+        try {
+            // Request camera permission if playing
+            if (isPlaying) {
+                await setTorch(true);
+            }
+        } catch (error) {
+            console.error("Failed to enable torch:", error);
+            // Reset state if failed
+            isTorchOn = false;
+            torchToggle.innerHTML = '<span class="material-icons">flashlight_off</span><span>Off</span>';
+            torchToggle.classList.remove('torch-on');
+            
+            // Show error message to user
+            alert("Could not access flashlight. Make sure your device supports it and you've granted camera permission.");
+        }
+    } else {
+        // Turn off torch
+        torchToggle.innerHTML = '<span class="material-icons">flashlight_off</span><span>Off</span>';
+        torchToggle.classList.remove('torch-on');
+        
+        // Turn off the torch if it was on
+        await setTorch(false);
+    }
+    
+    localStorage.setItem("isTorchOn", isTorchOn);
 });
 
 // Check if device supports dark mode and apply if preferred
@@ -174,6 +228,15 @@ if (savedSoundType !== null) {
         soundToggle.innerHTML = '<span class="material-icons">graphic_eq</span><span>WAV</span>';
         soundToggle.classList.add('wav');
     }
+}
+
+// Set initial torch state
+const savedTorchState = localStorage.getItem("isTorchOn");
+if (savedTorchState === "true") {
+    // Don't automatically turn on torch, just update UI
+    isTorchOn = true;
+    torchToggle.innerHTML = '<span class="material-icons">flashlight_on</span><span>On</span>';
+    torchToggle.classList.add('torch-on');
 }
 
 // Add ripple effect to buttons

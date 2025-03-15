@@ -272,16 +272,27 @@ body {
     color: var(--md-tertiary);
 }
 
-.sound-toggle {
+.sound-toggle, .torch-toggle {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: var(--md-spacing-s);
 }
 
-.sound-label {
+.sound-label, .torch-label {
     font: var(--md-font-label);
     color: var(--md-secondary);
+}
+
+.md-button-secondary.torch-on {
+    background-color: #FFC107;
+    color: #5D4037;
+}
+
+/* Dark mode support for torch button */
+body.dark-theme .md-button-secondary.torch-on {
+    background-color: #FFD54F;
+    color: #4E342E;
 }
 
 .material-icons {
@@ -453,4 +464,15 @@ body.dark-theme .controls-card {
     body.dark-theme .md-button-secondary.wav {
         background-color: rgba(239, 184, 200, 0.85);
     }
+}
+
+.md-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.md-button:disabled:hover {
+    background-color: var(--md-surface-variant);
+    box-shadow: none;
 }
