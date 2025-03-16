@@ -7,12 +7,12 @@ const body = document.querySelector('body');
 const appContainer = document.querySelector('.app-container');
 
 let isPlaying = false;
-let useSynth = true;
+let soundType = 'whiteNoise'; // Changed from useSynth to soundType with multiple options
 let currentHue = 0;
 let isTorchOn = false;
 
-// Initialize Tone.js synth with higher pitch settings
-const synth = new Tone.NoiseSynth({
+// Initialize Tone.js synths with different settings
+const whiteNoiseSynth = new Tone.NoiseSynth({
     noise: {
         type: 'white'
     },
@@ -24,6 +24,42 @@ const synth = new Tone.NoiseSynth({
     }
 }).toDestination();
 
+const pinkNoiseSynth = new Tone.NoiseSynth({
+    noise: {
+        type: 'pink'
+    },
+    envelope: {
+        attack: 0.001,
+        decay: 0.1,
+        sustain: 0,
+        release: 0.01
+    }
+}).toDestination();
+
+const brownNoiseSynth = new Tone.NoiseSynth({
+    noise: {
+        type: 'brown'
+    },
+    envelope: {
+        attack: 0.001,
+        decay: 0.15,
+        sustain: 0,
+        release: 0.01
+    }
+}).toDestination();
+
+const toneSynth = new Tone.Synth({
+    oscillator: {
+        type: 'sine'
+    },
+    envelope: {
+        attack: 0.001,
+        decay: 0.1,
+        sustain: 0,
+        release: 0.1
+    }
+}).toDestination();
+
 // Add a filter to shape the noise into a click
 const filter = new Tone.Filter({
     frequency: 11400,
@@ -31,8 +67,13 @@ const filter = new Tone.Filter({
     Q: 5
 }).toDestination();
 
-synth.connect(filter);
-synth.volume.value = 0;
+whiteNoiseSynth.connect(filter);
+pinkNoiseSynth.connect(filter);
+brownNoiseSynth.connect(filter);
+whiteNoiseSynth.volume.value = 0;
+pinkNoiseSynth.volume.value = 0;
+brownNoiseSynth.volume.value = 0;
+toneSynth.volume.value = -10;
 
 // Load WAV files as players
 const hiPlayer = new Tone.Player("hi.wav").toDestination();
@@ -58,15 +99,30 @@ function generateMaterialColor() {
 
 // Create Tone.js loop
 let loop = new Tone.Loop(time => {
-    if (useSynth) {
-        synth.triggerAttackRelease('32n', time);
-    } else {
-        // Alternate between hi and low sounds
-        if (Tone.Transport.position.split(':')[2] === '0') {
+    switch(soundType) {
+        case 'whiteNoise':
+            whiteNoiseSynth.triggerAttackRelease('32n', time);
+            break;
+        case 'pinkNoise':
+            pinkNoiseSynth.triggerAttackRelease('32n', time);
+            break;
+        case 'brownNoise':
+            brownNoiseSynth.triggerAttackRelease('32n', time);
+            break;
+        case 'tone':
+            toneSynth.triggerAttackRelease('C5', '32n', time);
+            break;
+        case 'hiWav':
             hiPlayer.start(time);
-        } else {
-            lowPlayer.start(time);
-        }
+            break;
+        case 'alternateWav':
+            // Alternate between hi and low sounds
+            if (Tone.Transport.position.split(':')[2] === '0') {
+                hiPlayer.start(time);
+            } else {
+                lowPlayer.start(time);
+            }
+            break;
     }
     
     // Generate a new material design color
@@ -140,15 +196,36 @@ playButton.addEventListener('click', async () => {
 
 // Handle sound toggle button
 soundToggle.addEventListener('click', () => {
-    useSynth = !useSynth;
-    if (useSynth) {
-        soundToggle.innerHTML = '<span class="material-icons">music_note</span><span>Synth</span>';
-        soundToggle.classList.remove('wav');
-    } else {
-        soundToggle.innerHTML = '<span class="material-icons">graphic_eq</span><span>WAV</span>';
-        soundToggle.classList.add('wav');
+    // Cycle through sound types
+    switch(soundType) {
+        case 'whiteNoise':
+            soundType = 'pinkNoise';
+            soundToggle.innerHTML = '<span class="material-icons">music_note</span><span>Pink Noise</span>';
+            break;
+        case 'pinkNoise':
+            soundType = 'brownNoise';
+            soundToggle.innerHTML = '<span class="material-icons">music_note</span><span>Brown Noise</span>';
+            break;
+        case 'brownNoise':
+            soundType = 'tone';
+            soundToggle.innerHTML = '<span class="material-icons">music_note</span><span>Tone</span>';
+            break;
+        case 'tone':
+            soundType = 'hiWav';
+            soundToggle.innerHTML = '<span class="material-icons">graphic_eq</span><span>Hi WAV</span>';
+            soundToggle.classList.add('wav');
+            break;
+        case 'hiWav':
+            soundType = 'alternateWav';
+            soundToggle.innerHTML = '<span class="material-icons">graphic_eq</span><span>Alt WAV</span>';
+            break;
+        case 'alternateWav':
+            soundType = 'whiteNoise';
+            soundToggle.innerHTML = '<span class="material-icons">music_note</span><span>White Noise</span>';
+            soundToggle.classList.remove('wav');
+            break;
     }
-    localStorage.setItem("useSynth", useSynth);
+    localStorage.setItem("soundType", soundType);
 });
 
 // Handle torch toggle button
@@ -221,13 +298,40 @@ if (savedBpm) {
 Tone.Transport.bpm.value = bpmSlider.value;
 
 // Set initial sound type
-const savedSoundType = localStorage.getItem("useSynth");
-if (savedSoundType !== null) {
-    useSynth = savedSoundType === "true";
-    if (!useSynth) {
-        soundToggle.innerHTML = '<span class="material-icons">graphic_eq</span><span>WAV</span>';
-        soundToggle.classList.add('wav');
+const savedSoundType = localStorage.getItem("soundType");
+if (savedSoundType) {
+    soundType = savedSoundType;
+    // Set the correct button text based on the saved sound type
+    switch(soundType) {
+        case 'whiteNoise':
+            soundToggle.innerHTML = '<span class="material-icons">music_note</span><span>White Noise</span>';
+            soundToggle.classList.remove('wav');
+            break;
+        case 'pinkNoise':
+            soundToggle.innerHTML = '<span class="material-icons">music_note</span><span>Pink Noise</span>';
+            soundToggle.classList.remove('wav');
+            break;
+        case 'brownNoise':
+            soundToggle.innerHTML = '<span class="material-icons">music_note</span><span>Brown Noise</span>';
+            soundToggle.classList.remove('wav');
+            break;
+        case 'tone':
+            soundToggle.innerHTML = '<span class="material-icons">music_note</span><span>Tone</span>';
+            soundToggle.classList.remove('wav');
+            break;
+        case 'hiWav':
+            soundToggle.innerHTML = '<span class="material-icons">graphic_eq</span><span>Hi WAV</span>';
+            soundToggle.classList.add('wav');
+            break;
+        case 'alternateWav':
+            soundToggle.innerHTML = '<span class="material-icons">graphic_eq</span><span>Alt WAV</span>';
+            soundToggle.classList.add('wav');
+            break;
     }
+} else {
+    // Default to white noise if no saved preference
+    soundType = 'whiteNoise';
+    soundToggle.innerHTML = '<span class="material-icons">music_note</span><span>White Noise</span>';
 }
 
 // Set initial torch state
